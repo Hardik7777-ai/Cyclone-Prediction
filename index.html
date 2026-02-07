@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cyclone Predictor</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+
+<body>
+
+  
+  <div id="menu-button">☰</div>
+
+  
+  <div id="info-panel">
+    <div id="close-panel">✖</div>
+    <h2>🌪️ About Cyclones</h2>
+    <p>
+      Cyclones are powerful storm systems characterized by low-pressure centers and spiraling winds. They draw energy from warm ocean waters and can cause extensive damage.
+    </p>
+    <h3>🔍 Feature Explanations</h3>
+    <ul>
+      <li><strong>Sea Surface Temperature (SST):</strong> Cyclones often form when SST is <b>above 26.5°C</b>.</li>
+      <li><strong>Atmospheric Pressure:</strong> Cyclone-prone conditions occur when pressure is <b>below 1005 hPa</b>.</li>
+      <li><strong>Humidity:</strong> High humidity <b>(above 70%)</b> favors cyclone formation.</li>
+      <li><strong>Wind Shear:</strong> <b>Below 15 knots</b> is favorable; high shear weakens cyclone structure.</li>
+      <li><strong>Vorticity:</strong> Values <b>above 0.00001 (1e-5 s⁻¹)</b> often indicate rotational strength supportive of cyclones.</li>
+    </ul>
+  </div>
+
+  <div class="main-flex">
+    <div class="container">
+      <h2 class="left-heading">Cyclone Prediction</h2>
+      <form id="cycloneForm">
+        <label>Sea Surface Temperature</label>
+        <input type="number" step="any" id="sst" required>
+        <small class="example">e.g., 27.50 </small>
+
+        <label>Atmospheric Pressure</label>
+        <input type="number" step="any" id="pressure" required>
+        <small class="example">e.g., 1008.52 </small>
+
+        <label>Humidity</label>
+        <input type="number" step="any" id="humidity" required>
+        <small class="example">e.g., 89.28</small>
+
+        <label>Wind Shear</label>
+        <input type="number" step="any" id="wind" required>
+        <small class="example">e.g., 13.98</small>
+
+        <label>Vorticity:</label>
+        <input type="number" step="any" name="Vorticity" required>
+        <small class="example">e.g., 0.000020</small>
+
+        <button type="submit">Predict Cyclone</button>
+      </form>
+
+      <div id="result"></div>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const menuBtn = document.getElementById('menu-button');
+      const infoPanel = document.getElementById('info-panel');
+      const closePanelBtn = document.getElementById('close-panel');
+
+      // Open panel and hide menu button
+      menuBtn.addEventListener('click', () => {
+        infoPanel.classList.add('active');
+        menuBtn.classList.add('hidden');
+      });
+
+      // Close panel and show menu button
+      closePanelBtn.addEventListener('click', () => {
+        infoPanel.classList.remove('active');
+        menuBtn.classList.remove('hidden');
+      });
+
+      // Leaflet Map
+      const map = L.map('map').setView([20, 78], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Form submission
+      document.getElementById('cycloneForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const data = {
+          Sea_Surface_Temperature: parseFloat(document.getElementById('sst').value),
+          Atmospheric_Pressure: parseFloat(document.getElementById('pressure').value),
+          Humidity: parseFloat(document.getElementById('humidity').value),
+          Wind_Shear: parseFloat(document.getElementById('wind').value),
+          Vorticity: parseFloat(document.querySelector('input[name="Vorticity"]').value)
+        };
+
+        fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+          .then(async res => {
+            if (!res.ok) {
+              return res.json().then(errorData => {
+                throw new Error(errorData.error || 'Server error');
+              });
+            }
+            return res.json();
+          })
+          .then(json => {
+            const predictionText = json.prediction_text;
+            const probability = json.prediction_probability;
+
+            let displayMessage;
+            if (predictionText.includes("No Cyclone")) {
+              displayMessage = `✅ ${predictionText} (Probability: ${probability})`;
+            } else if (predictionText.includes("Cyclone")) {
+              displayMessage = `🚨 ${predictionText} (Probability: ${probability})`;
+            } else {
+              displayMessage = `Prediction: ${predictionText} (Probability: ${probability})`;
+            }
+
+            document.getElementById('result').innerText = displayMessage;
+
+            const lat = 5 + Math.random() * 17;
+            const lon = 66 + Math.random() * 24;
+            const numericProbability = parseFloat(probability.replace('%', ''));
+            const color = numericProbability > 70 ? 'red' : numericProbability > 40 ? 'orange' : 'yellow';
+
+            const popupInfo = `
+              <b>${predictionText}</b><br>
+              Probability: ${probability}<br>
+              Wind: ${data.Wind_Shear} knots<br>
+              Pressure: ${data.Atmospheric_Pressure} hPa<br>
+              Category: ${getCategory(data.Wind_Shear)}
+            `;
+
+            L.circle([lat, lon], {
+              color: color,
+              fillColor: color,
+              fillOpacity: 0.6,
+              radius: 50000
+            }).addTo(map).bindPopup(popupInfo).openPopup();
+          })
+          .catch(err => {
+            document.getElementById('result').innerText = "⚠️ Error connecting to server or processing response.";
+            console.error("Fetch error:", err);
+          });
+      });
+
+      function getCategory(windSpeed) {
+        if (windSpeed >= 64) return "Category 3+";
+        if (windSpeed >= 48) return "Category 2";
+        if (windSpeed >= 34) return "Category 1";
+        return "Tropical Depression";
+      }
+    });
+  </script>
+</body>
+
+</html>

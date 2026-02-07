@@ -1,0 +1,160 @@
+body {
+  font-family: Arial, sans-serif;
+  background: url('WhatsApp Image 2025-06-21 at 17.35.48_86921e71.jpg') no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.main-flex {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 60px;
+  flex-wrap: wrap;
+  padding: 5px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.65);
+  padding: 25px;
+  border-radius: 10px;
+  width: 360px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-left: 30px;
+  height: 700px;
+}
+
+.left-heading {
+  text-align: left;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  color: #333;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 5px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.example {
+  font-size: 12px;
+  color: #666;
+  margin-top: 3px;
+  display: block;
+  text-align: left;
+}
+
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+#result {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+}
+
+#map {
+  height: 750px;
+  width: 550px;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+/* ☰ Menu button */
+#menu-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 28px;
+  background: rgba(0, 123, 255, 0.8);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1001;
+  transition: background 0.3s;
+}
+
+#menu-button:hover {
+  background: rgba(0, 86, 179, 0.9);
+}
+
+#menu-button.hidden {
+  display: none;
+}
+
+
+#info-panel {
+  position: fixed;
+  top: 0;
+  left: -350px; 
+  width: 300px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  overflow-y: auto;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+#info-panel.active {
+  left: 0;
+}
+
+
+#close-panel {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#info-panel h2,
+#info-panel h3 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+#info-panel ul {
+  padding-left: 20px;
+}
+
+#info-panel li {
+  margin-bottom: 10px;
+}
